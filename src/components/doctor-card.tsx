@@ -4,11 +4,23 @@ import type { Doctor } from '@/types/doctor';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, Briefcase, CalendarDays, IndianRupee, GraduationCap, Languages } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Star, Briefcase, CalendarDays, IndianRupee, GraduationCap, Languages, User } from 'lucide-react';
 
 interface DoctorCardProps {
   doctor: Doctor;
 }
+
+// Helper function to get initials from name
+const getInitials = (name: string) => {
+  const names = name.split(' ');
+  let initials = names[0].substring(0, 1).toUpperCase();
+  if (names.length > 1) {
+    initials += names[names.length - 1].substring(0, 1).toUpperCase();
+  }
+  return initials;
+};
+
 
 const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
   return (
@@ -16,14 +28,19 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
       <CardContent className="p-4 flex flex-col sm:flex-row gap-4">
         {/* Image Section */}
         <div className="flex flex-col items-center sm:items-start sm:w-1/4">
-          <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden mb-2 border-2 border-primary/20">
-            <Image
-              src={doctor.imageUrl || 'https://picsum.photos/128/128'} // Placeholder if no image
-              alt={`Dr. ${doctor.name}`}
-              layout="fill"
-              objectFit="cover"
-            />
-          </div>
+           <Avatar className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden mb-2 border-2 border-primary/20">
+             {/* Use AvatarImage with fallback */}
+             <AvatarImage
+                src={doctor.imageUrl} // Use the potentially realistic image URL
+                alt={`Dr. ${doctor.name}`}
+                className="object-cover" // Ensure image covers the area
+             />
+             {/* Fallback uses initials or a generic icon */}
+             <AvatarFallback className="bg-muted text-muted-foreground">
+                {doctor.name ? getInitials(doctor.name) : <User className="w-1/2 h-1/2" />}
+             </AvatarFallback>
+           </Avatar>
+
           {doctor.rating && (
             <Badge variant="secondary" className="flex items-center gap-1 text-xs mb-2">
               <Star className="w-3 h-3 text-yellow-500 fill-yellow-400" />

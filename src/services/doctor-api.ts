@@ -17,7 +17,7 @@ const MOCK_DOCTORS: Doctor[] = [
     consultationFee: 500,
     availability: 'today',
     availableTimeSlots: ['10:00 AM', '11:30 AM', '02:00 PM'],
-    imageUrl: 'https://picsum.photos/seed/doc1/128/128',
+    imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg', // Updated image
     location: 'Delhi',
     languages: ['English', 'Hindi'],
     qualifications: ['MBBS', 'MD (Internal Medicine)'],
@@ -33,7 +33,7 @@ const MOCK_DOCTORS: Doctor[] = [
     consultationFee: 600,
     availability: 'tomorrow',
     availableTimeSlots: ['09:00 AM', '10:30 AM', '01:00 PM'],
-    imageUrl: 'https://picsum.photos/seed/doc2/128/128',
+    imageUrl: 'https://randomuser.me/api/portraits/women/2.jpg', // Updated image
     location: 'Mumbai',
     languages: ['English', 'Marathi'],
     qualifications: ['MBBS'],
@@ -49,7 +49,7 @@ const MOCK_DOCTORS: Doctor[] = [
     consultationFee: 750,
     availability: 'today',
     availableTimeSlots: ['04:00 PM', '05:00 PM'],
-    imageUrl: 'https://picsum.photos/seed/doc3/128/128',
+    imageUrl: 'https://randomuser.me/api/portraits/men/3.jpg', // Updated image
     location: 'Bangalore',
     languages: ['English', 'Kannada', 'Hindi'],
     qualifications: ['MBBS', 'DNB (General Medicine)'],
@@ -65,12 +65,44 @@ const MOCK_DOCTORS: Doctor[] = [
     consultationFee: 400,
     availability: 'tomorrow',
      availableTimeSlots: ['11:00 AM', '12:00 PM', '03:30 PM'],
-    imageUrl: 'https://picsum.photos/seed/doc4/128/128',
+    imageUrl: 'https://randomuser.me/api/portraits/women/4.jpg', // Updated image
     location: 'Ahmedabad',
      languages: ['English', 'Gujarati'],
      qualifications: ['MBBS'],
     rating: 4.3,
     reviewCount: 75,
+  },
+   { // Adding a few more doctors for better pagination testing
+    id: '5',
+    name: 'Vikram Reddy',
+    specialty: 'General Physician/Internal Medicine',
+    experience: 12,
+    consultationFee: 700,
+    availability: 'today',
+    availableTimeSlots: ['09:30 AM', '11:00 AM'],
+    imageUrl: 'https://randomuser.me/api/portraits/men/5.jpg',
+    location: 'Hyderabad',
+    languages: ['English', 'Telugu'],
+    qualifications: ['MBBS', 'MD'],
+    clinicName: 'Care Hospitals',
+    rating: 4.6,
+    reviewCount: 180,
+  },
+  {
+    id: '6',
+    name: 'Anjali Desai',
+    specialty: 'General Physician/Internal Medicine',
+    experience: 7,
+    consultationFee: 550,
+    availability: 'tomorrow',
+    availableTimeSlots: ['02:30 PM', '04:30 PM'],
+    imageUrl: 'https://randomuser.me/api/portraits/women/6.jpg',
+    location: 'Pune',
+    languages: ['English', 'Marathi', 'Hindi'],
+    qualifications: ['MBBS'],
+    clinicName: 'Sahyadri Clinic',
+    rating: 4.4,
+    reviewCount: 115,
   },
 ];
 
@@ -111,7 +143,7 @@ export const listDoctors = async (filters: DoctorFilters): Promise<ListDoctorsRe
 
        // Apply sorting (basic example)
        if (filters.sortBy) {
-         filteredDoctors.sort((a, b) => {
+         const sortedDoctors = [...filteredDoctors].sort((a, b) => { // Sort a copy
            const order = filters.sortOrder === 'desc' ? -1 : 1;
            switch (filters.sortBy) {
              case 'experience':
@@ -127,7 +159,9 @@ export const listDoctors = async (filters: DoctorFilters): Promise<ListDoctorsRe
                return 0;
            }
          });
+         filteredDoctors = sortedDoctors; // Update filteredDoctors with the sorted array
        }
+
 
        // Apply pagination
        const page = filters.page || 1;
@@ -185,7 +219,8 @@ export const addDoctor = async (doctorData: Omit<Doctor, 'id'>): Promise<Doctor>
        const newDoctor: Doctor = {
          ...doctorData,
          id: String(Date.now()), // Simple mock ID generation
-         imageUrl: doctorData.imageUrl || `https://picsum.photos/seed/${Date.now()}/128/128` // Add placeholder if missing
+         // Use a realistic placeholder or allow overriding
+         imageUrl: doctorData.imageUrl || `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 99)}.jpg`
        };
        MOCK_DOCTORS.push(newDoctor); // Add to mock data (won't persist)
        console.log("Current Mock Doctors:", MOCK_DOCTORS);
