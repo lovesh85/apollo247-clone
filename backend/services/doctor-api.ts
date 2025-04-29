@@ -1,6 +1,7 @@
 import type { Doctor, DoctorFilters } from '@/types/doctor';
 
 // NOTE: Replace '/api/doctors' with your actual backend API endpoint.
+import { Doctor as DoctorType } from "@/types/doctor";
 // This is a placeholder for the frontend API interaction layer.
 // The actual backend implementation (add-doctor, list-doctor-with-filter)
 // needs to be created separately using a backend technology (e.g., Node.js/Express, Python/Flask, etc.).
@@ -112,6 +113,36 @@ interface ListDoctorsResponse {
   totalPages: number;
   currentPage: number;
 }
+
+
+
+export const getDoctors = async (
+  page: number,
+  pageSize: number,
+  specialization?: string,
+  city?: string
+): Promise<{ doctors: DoctorType[]; totalPages: number }> => {
+  const queryParams = new URLSearchParams();
+  queryParams.append('page', String(page));
+  queryParams.append('pageSize', String(pageSize));
+  if (specialization) {
+    queryParams.append('specialization', specialization);
+  }
+  if (city) {
+    queryParams.append('city', city);
+  }
+
+  const response = await fetch(`/api/doctors?${queryParams.toString()}`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch doctors");
+  }
+
+  const data = await response.json();
+  return data;
+};
+
+
 
 /**
  * Fetches a list of doctors based on filters and pagination.

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Accordion,
   AccordionContent,
@@ -14,15 +14,21 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import type { DoctorFilters } from '@/types/doctor';
-import { Filter, RotateCcw } from 'lucide-react';
+import { Filter, RotateCcw, X } from 'lucide-react';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getDoctors } from '@/services/doctor-api';
 
 interface FiltersProps {
   initialFilters?: Partial<DoctorFilters>;
   onFilterChange: (filters: Partial<DoctorFilters>) => void;
-  specialties: string[]; // Example: Pass available specialties
+  specialties: string[];
+  cities: string[];
+  setDoctors: any;
 }
 
 const Filters: React.FC<FiltersProps> = ({
+  setDoctors,
+  cities,
   initialFilters = {},
   onFilterChange,
   specialties = ["General Physician/Internal Medicine", "Cardiologist", "Dermatologist"], // Default/Example specialties
@@ -34,6 +40,9 @@ const Filters: React.FC<FiltersProps> = ({
     initialFilters.specialty ? [initialFilters.specialty] : []
   );
   const [sortBy, setSortBy] = useState<DoctorFilters['sortBy']>(initialFilters.sortBy || 'experience');
+  const [selectedCity, setSelectedCity] = useState<string>('');
+  const [selectedSpecialization, setSelectedSpecialization] = useState<string>('');
+
 
   const handleSpecialtyChange = (specialty: string) => {
     const newSelection = selectedSpecialties.includes(specialty)
@@ -75,6 +84,16 @@ const Filters: React.FC<FiltersProps> = ({
     [availability, minExperience, maxFee, selectedSpecialties, sortBy, onFilterChange]
   );
 
+  const handleFilter = async (city: string, specialization: string) => {
+    const doctors = await getDoctors(1, 10, specialization, city);
+    setDoctors(doctors.doctors);
+  };
+
+  useEffect(() => {
+    const filter = debouncedApplyFilters;
+    filter({});
+  }, []);
+
 
   const handleResetFilters = () => {
     setAvailability('any');
@@ -83,6 +102,8 @@ const Filters: React.FC<FiltersProps> = ({
     setSelectedSpecialties([]);
     setSortBy('experience');
     onFilterChange({}); // Notify parent about reset
+    setSelectedCity('')
+    setSelectedSpecialization('')
   };
 
   return (
@@ -97,6 +118,40 @@ const Filters: React.FC<FiltersProps> = ({
             Reset
           </Button>
         </div>
+        <div className='flex gap-4'>
+        <Select onValueChange={setSelectedCity} value={selectedCity}>
+                <SelectTrigger className="w-[180px] h-10">
+                  <SelectValue placeholder="Select City" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                  {cities.map((city) => (
+                    <SelectItem key={city} value={city}>{city}</SelectItem>
+                  ))}
+                    
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Select onValueChange={setSelectedSpecialization} value={selectedSpecialization}>
+                <SelectTrigger className="w-[220px] h-10">
+                  <SelectValue placeholder="Select Specialization" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                  {specialties.map((specialty) => (
+                    <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
+                  ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+        </div>
+        <Button
+        onClick={() => handleFilter(selectedCity, selectedSpecialization)}
+         className="w-full mt-4 bg-accent text-accent-foreground hover:bg-accent/90">
+          Apply Filter
+        </Button>
+
+        <div className="mt-4"></div>
 
       <Accordion type="multiple" defaultValue={['availability', 'specialty', 'experience', 'fee', 'sort']} className="w-full">
         {/* Availability Filter */}
